@@ -1,9 +1,6 @@
 import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 
 // --- KONFIGURACJA API ---
-// Automatyczne wykrywanie środowiska:
-// - Na produkcji (Netlify) używamy funkcji serverless: /.netlify/functions
-// - Lokalnie używamy Twojego server.js: http://localhost:4242
 const isProduction = window.location.hostname !== 'localhost';
 const API_URL = isProduction ? '/.netlify/functions' : 'http://localhost:4242';
 
@@ -15,7 +12,6 @@ if (typeof document !== 'undefined' && !document.getElementById('tailwind-cdn'))
   document.head.appendChild(script);
 }
 
-// --- IKONY (Zoptymalizowane inline SVG) ---
 const IconBase = ({ children, className, ...props }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
 );
@@ -46,6 +42,33 @@ const Icons = {
 };
 
 const MOCK_PRODUCTS_DATA = [
+  {
+    id: 'prod_1',
+    name: 'Spider Web',
+    price: 29.99,
+    image: 'https://placehold.co/400x300',
+    latin: 'Araneus diadematus',
+    type: 'spider',
+    desc: 'Wspaniała sieć pajęcza'
+  },
+  {
+    id: 'prod_2',
+    name: 'Spider Legs',
+    price: 19.99,
+    image: 'https://placehold.co/400x300',
+    latin: 'Araneus ventricosus',
+    type: 'spider',
+    desc: 'Długie nogi pajęczyce'
+  },
+  {
+    id: 'prod_3',
+    name: 'Spider Egg Sack',
+    price: 14.99,
+    image: 'https://placehold.co/400x300',
+    latin: 'Paraphidippus aurantius',
+    type: 'spider',
+    desc: 'Kostka jaj pajęcza'
+  }
 ];
 
 const useCart = () => {
@@ -156,7 +179,7 @@ const StreamView = memo(() => (
                 <p className="text-gray-500 text-xs">Ptaszniki w ich naturalnym środowisku</p>
               </div>
             </div>
-            <a href="https://kick.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-[#53FC18] text-black px-6 py-3 rounded-2xl font-black text-sm hover:scale-105 transition-transform">
+            <a href="https://kick.com/spiderra" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-[#53FC18] text-black px-6 py-3 rounded-2xl font-black text-sm hover:scale-105 transition-transform">
                <Icons.Kick className="w-4 h-4" /> OBSERWUJ NA KICK
             </a>
           </div>
