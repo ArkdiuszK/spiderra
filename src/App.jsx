@@ -1,10 +1,7 @@
 import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 
 // --- KONFIGURACJA API ---
-// WAŻNE: Upewnij się, że plik w folderze 'netlify/functions' nazywa się dokładnie 'create-checkout-session.js'
 const isProduction = window.location.hostname !== 'localhost';
-// Jeśli testujesz lokalnie bez 'netlify dev', upewnij się, że masz włączony server.js na porcie 4242.
-// Jeśli używasz 'netlify dev', endpointy będą dostępne pod /.netlify/functions również lokalnie.
 const API_URL = isProduction ? '/.netlify/functions' : 'http://localhost:4242';
 
 // --- KONFIGURACJA DANYCH FIRMY ---
@@ -62,7 +59,9 @@ const Icons = {
   Loader: (p) => <IconBase {...p} className={`animate-spin ${p.className}`}><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></IconBase>
 };
 
-const MOCK_PRODUCTS_DATA = [];
+const MOCK_PRODUCTS_DATA = [
+  
+];
 
 const useCart = () => {
   const [cart, setCart] = useState([]);
@@ -92,10 +91,55 @@ const useCart = () => {
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.qty), 0), [cart]);
   const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart]);
 
-  return { cart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast };
+  return { cart, setCart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast };
 };
 
 // --- WIDOKI ---
+
+const SuccessView = memo(({ lastOrder }) => {
+  if (!lastOrder) return null;
+
+  const total = lastOrder.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+  return (
+    <div className="bg-white rounded-3xl border border-gray-100 p-8 md:p-16 animate-fade-in shadow-sm max-w-3xl mx-auto text-center">
+      <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
+        <Icons.Check className="w-10 h-10" />
+      </div>
+      <h2 className="text-3xl font-black text-gray-900 mb-2">Dziękujemy za zamówienie!</h2>
+      <p className="text-gray-500 mb-8">Płatność została przyjęta. Na Twój adres e-mail wysłaliśmy potwierdzenie.</p>
+
+      <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left">
+        <h3 className="font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Podsumowanie zakupów</h3>
+        <div className="space-y-4">
+          {lastOrder.map((item, idx) => (
+            <div key={idx} className="flex justify-between items-center text-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white rounded-lg overflow-hidden border border-gray-200">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">{item.name}</p>
+                  <p className="text-gray-500 text-xs">{item.qty} x {item.price.toFixed(2)} zł</p>
+                </div>
+              </div>
+              <span className="font-bold text-gray-900">{(item.price * item.qty).toFixed(2)} zł</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center text-lg">
+          <span className="font-bold text-gray-500">Razem (produkty):</span>
+          <span className="font-black text-emerald-600">{total.toFixed(2)} zł</span>
+        </div>
+        <p className="text-xs text-gray-400 mt-2 text-right">* Do kwoty zostanie doliczony wybrany koszt dostawy.</p>
+      </div>
+
+      <button onClick={() => window.location.href = '/'} className="px-8 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all shadow-lg">
+        Wróć do sklepu
+      </button>
+    </div>
+  );
+});
 
 const HomeView = memo(({ navigateTo }) => (
   <div className="relative min-h-[70vh] flex items-center justify-center animate-fade-in overflow-hidden rounded-3xl">
@@ -498,8 +542,27 @@ export default function App() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isTailwindReady, setIsTailwindReady] = useState(false);
+  const [lastOrder, setLastOrder] = useState(null); // Nowy stan dla zamówienia
   
-  const { cart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast } = useCart();
+  const { cart, setCart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast } = useCart();
+
+  // Sprawdź czy po powrocie ze Stripe jest success=true
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success')) {
+      const savedCart = localStorage.getItem('pendingCart');
+      if (savedCart) {
+        setLastOrder(JSON.parse(savedCart));
+        localStorage.removeItem('pendingCart'); // Czyścimy localStorage
+        setCart([]); // Czyścimy aktywny koszyk
+        setActiveView('success'); // Przełączamy na widok sukcesu
+        window.history.replaceState({}, document.title, window.location.pathname); // Czyścimy URL
+      }
+    } else if (params.get('canceled')) {
+      showToast("Płatność została anulowana.", "error");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [setCart, showToast]);
 
   useEffect(() => {
     const checkTailwind = () => {
@@ -541,9 +604,13 @@ export default function App() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+    
+    // Zapisz koszyk do localStorage przed wyjściem do Stripe
+    localStorage.setItem('pendingCart', JSON.stringify(cart));
+    
     setCheckoutLoading(true);
     try {
-      const endpoint = `${API_URL}/create-checkout-session`; // Upewnij się, że plik w netlify/functions nazywa się create-checkout-session.js
+      const endpoint = `${API_URL}/create-checkout-session`;
       console.log("Wysyłanie żądania do:", endpoint);
 
       const res = await fetch(endpoint, {
@@ -553,7 +620,6 @@ export default function App() {
       });
 
       if (!res.ok) {
-        // Próba odczytania błędu z serwera
         const errorData = await res.json().catch(() => ({})); 
         throw new Error(errorData.error || `Błąd serwera: ${res.status}`);
       }
@@ -567,6 +633,7 @@ export default function App() {
     } catch (err) {
       console.error("Błąd płatności:", err);
       showToast(err.message, "error");
+      localStorage.removeItem('pendingCart'); // Czyścimy jeśli błąd
     } finally {
       setCheckoutLoading(false);
     }
@@ -643,6 +710,7 @@ export default function App() {
         {activeView === 'shop' && <ShopView addToCart={addToCart} products={products} loading={loading} />}
         {activeView === 'terms' && <TermsView />}
         {activeView === 'privacy' && <PrivacyView />}
+        {activeView === 'success' && <SuccessView lastOrder={lastOrder} />}
       </main>
 
       {/* Koszyk Panel */}
@@ -711,7 +779,7 @@ export default function App() {
               <h4 className="font-bold text-gray-900 uppercase tracking-widest text-xs mb-6">Sklep</h4>
               <ul className="space-y-4 text-sm font-bold text-gray-500">
                 <li><button onClick={() => navigate('shop')} className="hover:text-emerald-500 text-left">Ptaszniki</button></li>
-                <li><button onClick={() => navigate('shop')} className="hover:text-emerald-500 text-left">Terraria</button></li>
+                <li><button onClick={() => navigate('shop')} className="hover:text-emerald-500 text-left">Akcesoria</button></li>
                 <li><button onClick={() => navigate('shop')} className="hover:text-emerald-500 text-left">Nowości</button></li>
                 <li><button onClick={() => navigate('shop')} className="hover:text-emerald-500 text-left">Bestsellery</button></li>
               </ul>

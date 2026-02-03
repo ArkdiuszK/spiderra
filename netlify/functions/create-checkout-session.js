@@ -2,7 +2,7 @@ const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 exports.handler = async (event, context) => {
-  // Obsługa CORS dla zapytań OPTIONS (preflight)
+  // 1. Obsługa CORS (bez zmian)
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -15,7 +15,6 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Akceptujemy tylko metodę POST
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -27,21 +26,52 @@ exports.handler = async (event, context) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Koszyk jest pusty' }) };
     }
 
-    // Dynamicznie ustalamy adres powrotu (np. localhost lub domena na Netlify)
     const origin = event.headers.origin || 'http://localhost:5173';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card', 'blik'],
-      // Dodajemy zbieranie adresu wysyłki
+      
+      // --- DANE DO WYSYŁKI ---
       shipping_address_collection: {
-        allowed_countries: ['PL'], // Tutaj wpisz kody krajów, do których wysyłasz (np. ['PL', 'DE'])
+        allowed_countries: ['PL'], 
       },
-      // Dodajemy zbieranie numeru telefonu (przydatne dla kuriera)
       phone_number_collection: {
         enabled: true,
       },
-      // Opcjonalnie: Możesz włączyć zbieranie adresu rozliczeniowego, jeśli jest inny
+      // Zbieranie adresu do faktury
       billing_address_collection: 'required',
+
+      // --- NOWOŚĆ: AUTOMATYCZNE GENEROWANIE FAKTURY/PARAGONU ---
+      // Dzięki temu Stripe wie, że ma wysłać e-mail z potwierdzeniem (jeśli włączyłeś to w panelu)
+      invoice_creation: {
+        enabled: true,
+      },
+
+      // --- OPCJE DOSTAWY ---
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 1500, currency: 'pln' },
+            display_name: 'Paczkomat InPost',
+            delivery_estimate: {
+              minimum: { unit: 'business_day', value: 1 },
+              maximum: { unit: 'business_day', value: 2 },
+            },
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 2000, currency: 'pln' }, 
+            display_name: 'Kurier DPD',
+            delivery_estimate: {
+              minimum: { unit: 'business_day', value: 1 },
+              maximum: { unit: 'business_day', value: 3 },
+            },
+          },
+        },
+      ],
       
       line_items: items.map(item => ({
         price_data: {
@@ -50,7 +80,6 @@ exports.handler = async (event, context) => {
             name: item.name,
             images: [item.image],
           },
-          // Stripe oczekuje kwoty w groszach
           unit_amount: Math.round(item.price * 100),
         },
         quantity: item.qty,
