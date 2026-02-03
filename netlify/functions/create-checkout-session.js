@@ -52,8 +52,8 @@ exports.handler = async (event, context) => {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 1500, currency: 'pln' },
-            display_name: 'Paczkomat InPost',
+            fixed_amount: { amount: 2999, currency: 'pln' },
+            display_name: 'Kurier Pocztex (żywe zwierzeta)',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 1 },
               maximum: { unit: 'business_day', value: 2 },
@@ -63,14 +63,15 @@ exports.handler = async (event, context) => {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 2000, currency: 'pln' }, 
-            display_name: 'Kurier DPD',
+            fixed_amount: { amount: 2399, currency: 'pln' }, 
+            display_name: 'Kurier Inpost',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 1 },
               maximum: { unit: 'business_day', value: 3 },
             },
           },
         },
+        
       ],
       
       line_items: items.map(item => ({
