@@ -19,6 +19,7 @@ const COMPANY_DATA = {
 
 // --- KONFIGURACJA ZDJĘĆ ---
 const LOGO_URL = "/zdjecia/logo.png"; 
+const LOGO_URL2 = "/zdjecia/logo2.png"; 
 const HERO_IMAGE_URL = "/zdjecia/tlo.jpg"; 
 
 // --- DEFINICJA KATEGORII I GRUP FILTRÓW ---
@@ -42,7 +43,6 @@ const PRODUCT_CATEGORIES = [
           { id: 'terrestrial', label: 'Naziemne' },
           { id: 'arboreal', label: 'Nadrzewne' },
           { id: 'fossorial', label: 'Podziemne' },
-          { id: 'dwarf', label: 'Karłowate' },
           { id: 'rare', label: 'Rzadkie' },
           { id: 'bestseller', label: 'Bestsellery' }
         ]
@@ -56,7 +56,6 @@ const PRODUCT_CATEGORIES = [
       {
         label: "Kategorie",
         tags: [
-          { id: 'terrarium', label: 'Terraria' },
           { id: 'container', label: 'Pojemniki hodowlane' },
           { id: 'substrate', label: 'Podłoże' },
           { id: 'tools', label: 'Narzędzia' },
@@ -197,20 +196,20 @@ const MOCK_PRODUCTS_DATA = [
     desc: 'Jeden z największych pająków świata. Wymaga doświadczenia w utrzymaniu odpowiedniej wilgotności.' 
   },
   // --- ZESTAWY HODOWLANE Z WARIANTAMI ---
-  // WAŻNE: Podmień "price_PLACEHOLDER..." na swoje prawdziwe ID ze Stripe, jeśli nie korzystasz z backendu do pobierania produktów
   { 
     id: 'kit_s', 
-    name: 'Zestaw "Plecak" | Dla małych ptaszników', 
+    name: 'Zestaw S "Plecak" | Dla małych ptaszników', 
     latin: 'Dla L1-L3', 
     type: 'gear', 
     tags: ['container', 'bestseller'], 
     price: 11.99, 
-    image: 'https://placehold.co/400x300/f1f5f9/64748b?text=Zestaw+S', 
-    desc: 'Idealne pierwsze M1 dla Twojego malucha. Dostępny w trzech standardach podróży.',
+    image: 'https://placehold.co/400x300/f1f5f9/64748b?text=Zestaw+S', // Tu możesz podmienić na swoje zdjęcie breeding boxa
+    // Poniżej nowy, dopasowany opis:
+    desc: 'Najlepszy start dla malucha (L1-L3). W skład zestawu wchodzi profesjonalny pojemnik hodowlany typu Breeding Box (5x5x7cm) z bezpieczną klapką "feeding hatch", która ułatwia karmienie bez ryzyka ucieczki pająka. Krystalicznie przejrzyste ścianki pozwalają na doskonałą obserwację, a precyzyjna boczna wentylacja zapewnia zdrowy przepływ powietrza. To nie jest zwykłe pudełko – to bezpieczny azyl dla Twojego nowego podopiecznego.',
     variants: [
-      { id: 'eco', name: 'Economy', price: 11.99, desc: 'Pojemnik + Torf', stripeId: 'price_PLACEHOLDER_ECO_S' },
-      { id: 'biz', name: 'Business', price: 14.99, desc: 'Pojemnik + Torf + Kora', stripeId: 'price_PLACEHOLDER_BIZ_S' },
-      { id: 'first', name: 'First Class', price: 17.99, desc: 'Premium + Mech + Ozdoby', stripeId: 'price_PLACEHOLDER_FIRST_S' }
+      { id: 'eco', name: 'Economy', price: 11.99, desc: 'Pojemnik + Torf', stripeId: 'price_1Qnm...' }, // Pamiętaj o wklejeniu ID ze Stripe
+      { id: 'biz', name: 'Business', price: 14.99, desc: 'Pojemnik + Torf + Kora', stripeId: 'price_1Qnm...' },
+      { id: 'first', name: 'First Class', price: 17.99, desc: 'Premium + Mech + Ozdoby', stripeId: 'price_1Qnm...' }
     ]
   },
   { 
@@ -221,7 +220,7 @@ const MOCK_PRODUCTS_DATA = [
     tags: ['container'], 
     price: 39.99,
     image: 'https://placehold.co/400x300/f1f5f9/a8a29e?text=Zestaw+M', 
-    desc: 'Wygodne lokum dla podrostków. Więcej miejsca na wylinki i tupanie.',
+    desc: 'Komfortowa przesiadka do klasy biznes dla podrostków (L4-L7). Sercem zestawu jest przestronny box hodowlany (wymiary ok. 19x12,5x7,5 cm), który zapewnia idealną przestrzeń życiową na etapie dynamicznego wzrostu. Pojemnik wyposażony jest w wygodną klapkę inspekcyjną ("feeding hatch") do bezpiecznego podawania karmy oraz fabryczny system wentylacji bocznej i górnej. Krystalicznie czyste ścianki pozwalają cieszyć się widokiem pupila, a solidne zamknięcie gwarantuje, że pająk zostanie w środku.',
     variants: [
       { id: 'eco', name: 'Economy', price: 39.99, desc: 'Moczbox + Torf', stripeId: 'price_PLACEHOLDER_ECO_M' },
       { id: 'biz', name: 'Business', price: 49.00, desc: 'Braplast + Tuba', stripeId: 'price_PLACEHOLDER_BIZ_M' },
@@ -236,7 +235,7 @@ const MOCK_PRODUCTS_DATA = [
     tags: ['container'], 
     price: 72.99,
     image: 'https://placehold.co/400x300/f1f5f9/78716c?text=Zestaw+L', 
-    desc: 'Kompletna willa dla dorosłego pająka. Stabilne warunki na lata.',
+    desc: 'Luksusowa rezydencja dla dorosłych gigantów. Zestaw "Bagaż Rejestrowany" opiera się na masywnym pojemniku hodowlanym o wymiarach 32x22x15 cm, zapewniającym ogromną przestrzeń życiową nawet dla największych ptaszników. Box posiada zintegrowaną miskę na wodę (koniec z przewracaniem!), bezpieczny "feeding hatch" w pokrywie oraz system wentylacji krzyżowej. To docelowy apartament, w którym Twój pająk poczuje się jak król dżungli.',
     variants: [
       { id: 'eco', name: 'Economy', price: 72.99, desc: 'Box + Torf', stripeId: 'price_PLACEHOLDER_ECO_L' },
       { id: 'biz', name: 'Business', price: 89.00, desc: 'Duży Braplast + Duża Tuba', stripeId: 'price_PLACEHOLDER_BIZ_L' },
@@ -415,7 +414,7 @@ const TravelGallery = memo(({ navigateTo }) => {
           <h3 className="text-3xl md:text-4xl font-bold text-[#44403c]">Z Dziennika Podróży</h3>
         </div>
         <p className="text-[#78716c] text-sm max-w-md text-right md:text-left font-light leading-relaxed">
-          Nie jestem tylko sprzedawcą – jestem badaczem. Zobacz, jak wyglądają naturalne siedliska pająków, które oferuję.
+          A oto miejsca, które już odwiedziłem...
         </p>
       </div>
 
@@ -470,18 +469,28 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
 
   const handleAddToCart = () => {
     if (selectedVariant) {
-      // Tworzymy unikalny produkt wariantowy
+      // Tworzymy unikalny produkt wariantowy - CZYSTY OBIEKT DO KOSZYKA (BEZ OPISU)
       const variantProduct = {
-        ...product,
         id: `${product.id}-${selectedVariant.id}`, 
-        name: `${product.name} (${selectedVariant.name})`,
+        name: `${product.name} - ${selectedVariant.name}`, // Wyraźna nazwa wariantu
         price: selectedVariant.price,
-        stripeId: selectedVariant.stripeId, 
+        image: product.image,
+        latin: product.latin,
+        stripeId: selectedVariant.stripeId,
         originalId: product.id 
       };
       onAddToCart(variantProduct);
     } else {
-      onAddToCart(product);
+      // Dla zwykłych produktów też usuwamy opis z obiektu koszyka
+      const cleanProduct = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        latin: product.latin,
+        // brak pola desc
+      };
+      onAddToCart(cleanProduct);
     }
   };
 
@@ -495,6 +504,9 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
   }, [product, allProducts]);
 
   const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+  
+  // ZMIANA: Pokazuj wybór tylko jeśli jest więcej niż 1 opcja
+  const showVariantSelector = product.variants && product.variants.length > 1;
 
   return (
     <div className="animate-fade-in space-y-12">
@@ -520,8 +532,9 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
                 <p>{product.desc || "Brak szczegółowego opisu dla tego produktu."}</p>
               </div>
 
-              {/* SEKCJA WYBORU WARIANTU */}
-              {product.variants && product.variants.length > 0 && (
+              {/* SEKCJA WYBORU WARIANTU - ZMODYFIKOWANA */}
+              {/* Wyświetla się TYLKO jeśli jest więcej niż 1 wariant (czyli zestawy) */}
+              {showVariantSelector && (
                 <div className="mb-8 p-4 bg-[#fafaf9] rounded-2xl border border-[#e7e5e4]">
                   <p className="text-xs font-bold uppercase tracking-widest text-[#a8a29e] mb-3">Wybierz wersję:</p>
                   <div className="space-y-3">
@@ -560,7 +573,8 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
                 className="w-full py-4 bg-[#57534e] text-white rounded-xl font-bold text-lg hover:bg-[#44403c] transition-all shadow-md flex items-center justify-center gap-3 active:scale-[0.98]"
               >
                 <Icons.Plus className="w-6 h-6" /> 
-                {product.variants ? `Dodaj wariant ${selectedVariant ? selectedVariant.name : ''}` : 'Dodaj do koszyka'}
+                {/* Zmiana tekstu przycisku: jeśli jest wybór wariantów, pokaż nazwę, jeśli nie - standardowy tekst */}
+                {showVariantSelector ? `Dodaj wariant ${selectedVariant ? selectedVariant.name : ''}` : 'Dodaj do koszyka'}
               </button>
             </div>
           </div>
@@ -926,8 +940,8 @@ const AboutView = memo(() => (
         <Reveal delay={200}>
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[#44403c]">Cześć, jestem <span className="text-[#5c6b50]">Arek</span></h2>
           <div className="space-y-4 text-[#78716c] leading-relaxed font-light">
-              <p>Witaj w Spiderra! Moja przygoda z ptasznikami zaczęła się w 2020 roku od małej Chromki. Dziś to pasja, którą dzielę się z Wami, oferując ptaszniki z różnych regionów świata oraz transmitując to jak żyją w naturze.</p>
-              <p>Każdy pająk który jest w mojej ofercie jest wybrany tak aby zarówno początkujący jak i zaawansowany hodowca znalazł coś dla siebie. Dbam o to, abyś mógł/mogła cieszyć się swoim małym zwierzakiem.</p>
+              <p>Moja przygoda z ptasznikami zaczęła się w 2020 roku od małej Chromki. Dziś to pasja, którą dzielę się, oferując ptaszniki występujące w różnych regionach świata oraz transmitując to jak żyją w naturze i nie tylko...</p>
+              <p>Każdy pająk, który jest w mojej ofercie został wybrany tak, aby każdy znalazł coś dla siebie.</p>
           </div>
            
           <div className="mt-8 p-6 bg-[#f0f0eb] rounded-2xl border border-[#e6e5d8] relative overflow-hidden group">
@@ -985,7 +999,7 @@ const StreamView = memo(() => (
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-[#44403c] p-0.5 border border-[#57534e]">
                 <div className="w-full h-full rounded-[0.5rem] flex items-center justify-center overflow-hidden">
-                   <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain opacity-80" />
+                   <img src={LOGO_URL2} alt="Logo" className="w-full h-full object-contain opacity-100" />
                 </div>
               </div>
               <div>
@@ -1131,49 +1145,6 @@ const TermsView = memo(() => (
         <p>W sprawach nieuregulowanych w niniejszym Regulaminie mają zastosowanie powszechnie obowiązujące przepisy prawa polskiego, w szczególności: Kodeksu cywilnego, ustawy o świadczeniu usług drogą elektroniczną, ustawy o prawach konsumenta, ustawy o ochronie danych osobowych.</p>
       </section>
 
-    </div>
-  </div>
-));
-
-// --- PrivacyView ---
-const PrivacyView = memo(() => (
-  <div className="bg-white rounded-3xl border border-[#e5e5e0] p-8 md:p-16 animate-fade-in shadow-sm max-w-4xl mx-auto">
-    <div className="flex items-center gap-4 mb-8 border-b border-[#e5e5e0] pb-6">
-      <div className="p-3 bg-[#f5f5f0] rounded-xl text-[#5c6b50]"><Icons.Lock className="w-6 h-6" /></div>
-      <h2 className="text-2xl font-bold text-[#44403c]">Polityka Prywatności</h2>
-    </div>
-    <div className="prose prose-stone max-w-none text-[#78716c] leading-relaxed space-y-8 text-sm font-light">
-      <section>
-        <h3 className="font-bold text-[#44403c] text-base mb-3">1. Administrator Danych</h3>
-        <p>Administratorem Twoich danych osobowych jest {COMPANY_DATA.name}, z siedzibą w {COMPANY_DATA.city}, przy ul. {COMPANY_DATA.address}, posiadający NIP: {COMPANY_DATA.nip} oraz REGON: {COMPANY_DATA.regon}.</p>
-        <p>Kontakt z Administratorem jest możliwy drogą elektroniczną pod adresem: {COMPANY_DATA.email} lub telefonicznie: {COMPANY_DATA.phone}.</p>
-      </section>
-
-      <section>
-        <h3 className="font-bold text-[#44403c] text-base mb-3">2. Cele i podstawy przetwarzania</h3>
-        <p>Przetwarzamy Twoje dane w celach:</p>
-        <ul className="list-disc pl-5 mt-1 space-y-1 marker:text-[#5c6b50]">
-           <li>zawarcia i wykonania umowy sprzedaży (art. 6 ust. 1 lit. b RODO),</li>
-           <li>realizacji obowiązków prawnych, np. wystawiania faktur (art. 6 ust. 1 lit. c RODO),</li>
-           <li>dochodzenia roszczeń i obrony przed nimi (art. 6 ust. 1 lit. f RODO),</li>
-           <li>analitycznych i statystycznych (art. 6 ust. 1 lit. f RODO).</li>
-        </ul>
-      </section>
-
-      <section>
-        <h3 className="font-bold text-[#44403c] text-base mb-3">3. Odbiorcy danych</h3>
-        <p>Twoje dane mogą być przekazywane podmiotom, które pomagają nam prowadzić sklep, np.: firmom kurierskim (InPost, DPD) w celu dostawy, operatorowi płatności (Stripe) w celu realizacji zapłaty, dostawcy hostingu i usług IT.</p>
-      </section>
-
-      <section>
-        <h3 className="font-bold text-[#44403c] text-base mb-3">4. Prawa użytkownika</h3>
-        <p>Przysługuje Ci prawo do dostępu do swoich danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia danych, wniesienia sprzeciwu oraz wniesienia skargi do organu nadzorczego (Prezesa UODO).</p>
-      </section>
-
-      <section>
-        <h3 className="font-bold text-[#44403c] text-base mb-3">5. Pliki Cookies</h3>
-        <p>Sklep używa plików cookies (ciasteczka) w celu zapewnienia prawidłowego działania strony (np. utrzymania sesji koszyka) oraz w celach statystycznych. Możesz zarządzać ustawieniami cookies w swojej przeglądarce.</p>
-      </section>
     </div>
   </div>
 ));
@@ -1328,7 +1299,7 @@ export default function App() {
       <nav className="fixed top-0 w-full bg-[#faf9f6]/90 backdrop-blur-md z-[80] border-b border-[#e7e5e4] h-20 flex items-center shadow-sm">
         <div className="max-w-7xl mx-auto w-full px-6 flex justify-between items-center">
           <div className="cursor-pointer flex items-center" onClick={() => navigate('home')}>
-            <img src={LOGO_URL} alt="Spiderra" className="h-14 w-auto object-contain" />
+            <img src={LOGO_URL} alt="Spiderra" className="h-40 w-auto object-contain" />
           </div>
           <div className="flex items-center gap-8">
             <div className="hidden md:flex gap-8 text-sm font-medium text-[#78716c]">
@@ -1454,7 +1425,7 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div>
               <div className="mb-6 flex items-center">
-                <img src={LOGO_URL} alt="Spiderra" className="h-10 w-auto object-contain grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500" />
+                <img src={LOGO_URL2} alt="Spiderra" className="h-40 w-auto object-contain grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500" />
               </div>
               <div className="flex gap-3">
                 <a href="https://www.instagram.com/sp_iderra" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-[#f5f5f4] rounded-full flex items-center justify-center text-[#a8a29e] hover:bg-[#e7e5e4] hover:text-[#44403c] transition-all"><Icons.Instagram className="w-5 h-5"/></a>
