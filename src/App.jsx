@@ -6,7 +6,7 @@ const API_URL = isProduction ? '/.netlify/functions' : 'http://localhost:4242';
 
 // --- KONFIGURACJA DANYCH FIRMY ---
 const COMPANY_DATA = {
-  name: "Spiderra - Arkadiusz Kołacki",
+  name: "Spiderra.pl",
   address: "Rakowicka 22D/27",
   zip: "31-510",
   city: "Kraków",
@@ -34,7 +34,7 @@ const PRODUCT_CATEGORIES = [
         tags: [
           { id: 'female', label: 'Samica' },
           { id: 'male', label: 'Samiec' },
-          { id: 'unsexed', label: 'Niesex (NS)' }
+          { id: 'unsexed', label: 'Niesex' }
         ]
       },
       {
