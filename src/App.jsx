@@ -7,9 +7,9 @@ const API_URL = isProduction ? '/.netlify/functions' : 'http://localhost:4242';
 // --- KONFIGURACJA DANYCH FIRMY ---
 const COMPANY_DATA = {
   name: "Spiderra - Arkadiusz Kołacki",
-  address: "Lisów 88",
-  zip: "26-660",
-  city: "Lisów",
+  address: "Rakowicka 22D/27",
+  zip: "31-510",
+  city: "Kraków",
   email: "spiderra.kontakt@outlook.com",
   phone: "+48 514 729 121",
   nip: "0000000000", 
@@ -34,7 +34,7 @@ const PRODUCT_CATEGORIES = [
         tags: [
           { id: 'female', label: 'Samica' },
           { id: 'male', label: 'Samiec' },
-          { id: 'unsexed', label: 'Niesex' }
+          { id: 'unsexed', label: 'Niesex (NS)' }
         ]
       },
       {
@@ -304,6 +304,7 @@ const useCart = () => {
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
   const showToast = useCallback((message, type = 'success') => {
+    // Zabezpieczenie przed obiektami w message
     const msgString = (typeof message === 'string') ? message : 'Wystąpił błąd operacji.';
     setToast({ visible: true, message: msgString, type });
     setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
@@ -326,8 +327,11 @@ const useCart = () => {
 
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.qty), 0), [cart]);
   const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart]);
+  
+  // --- SPRAWDZANIE CZY W KOSZYKU SĄ ZWIERZĘTA ---
+  const hasLiveAnimals = useMemo(() => cart.some(item => item.type === 'spider'), [cart]);
 
-  return { cart, setCart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast };
+  return { cart, setCart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast, hasLiveAnimals };
 };
 
 // --- KOMPONENT: SCROLL TO TOP ---
@@ -357,7 +361,7 @@ const ScrollToTop = () => {
   );
 };
 
-// --- WIDOKI (DEFINIOWANE PRZED APPCONTENT) ---
+// --- WIDOKI (TERAZ DEFINIOWANE PRZED APPCONTENT) ---
 
 const SuccessView = memo(({ lastOrder }) => {
   if (!lastOrder) return null;
@@ -491,8 +495,8 @@ const TravelGallery = memo(({ navigateTo }) => {
           </div>
           <h3 className="text-3xl md:text-4xl font-bold text-[#44403c]">Z Dziennika Podróży</h3>
         </div>
-        <p className="text-[#78716c] text-sm max-w-md text-right md:text-left font-light leading-relaxed">
-          Nie jestem tylko sprzedawcą – jestem badaczem. Zobacz, jak wyglądają naturalne siedliska pająków, które oferuję.
+        <p className="text-sm max-w-md text-right md:text-left leading-relaxed">
+          A oto miejsca, które już odwiedziłem...
         </p>
       </div>
 
@@ -555,7 +559,9 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
         image: product.image,
         latin: product.latin,
         stripeId: selectedVariant.stripeId,
-        originalId: product.id 
+        originalId: product.id,
+        // PRZEKAZUJEMY TYP PRODUKTU!
+        type: product.type 
       };
       onAddToCart(variantProduct);
     } else {
@@ -565,6 +571,8 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
         price: product.price,
         image: product.image,
         latin: product.latin,
+        // PRZEKAZUJEMY TYP PRODUKTU!
+        type: product.type
       };
       onAddToCart(cleanProduct);
     }
@@ -698,6 +706,7 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
   );
 });
 
+// --- HomeView ---
 const HomeView = memo(({ navigateTo, products, onProductClick, addToCart }) => (
   <div className="animate-fade-in space-y-16 pb-12">
     <div className={`relative min-h-[70vh] flex items-center justify-center overflow-hidden rounded-3xl border border-[#e7e5e4] ${HERO_IMAGE_URL ? '' : 'bg-[#fafaf9]'}`}>
@@ -711,10 +720,10 @@ const HomeView = memo(({ navigateTo, products, onProductClick, addToCart }) => (
       )}
 
       <div className="text-center px-4 max-w-4xl mx-auto relative z-10">
-        <div className="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-[#5c6b50] uppercase bg-[#f0f0eb] rounded-full border border-[#e6e5e4] shadow-sm">
+        <div className="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest uppercase bg-[#f0f0eb] rounded-full border border-[#e6e5e4] shadow-sm">
           Nowości już dostępne!
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold text-[#44403c] mb-8 leading-[1.1] tracking-tight">
+        <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[1.1] tracking-tight">
           Terrarystyka i podróże <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5c6b50] to-[#4a5740]">w jednym</span>
         </h1>
@@ -736,6 +745,7 @@ const HomeView = memo(({ navigateTo, products, onProductClick, addToCart }) => (
   </div>
 ));
 
+// --- ShopView ---
 const ShopView = memo(({ addToCart, products, loading, onProductClick }) => {
   const [category, setCategory] = useState('all');
   const [selectedTags, setSelectedTags] = useState([]); 
@@ -1052,7 +1062,7 @@ const ShopView = memo(({ addToCart, products, loading, onProductClick }) => {
   );
 });
 
-// --- AboutView - ZMODYFIKOWANY DESIGN ---
+// --- AboutView ---
 const AboutView = memo(() => (
   <div className="animate-fade-in space-y-12">
     {/* Sekcja 1: Hero / Wstęp */}
@@ -1067,12 +1077,13 @@ const AboutView = memo(() => (
           {/* Tekst */}
           <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
              <span className="text-[#5c6b50] font-bold tracking-widest uppercase text-xs mb-4">O mnie</span>
-             <h2 className="text-4xl font-bold text-[#44403c] mb-6 leading-tight">Cześć, jestem Arek</h2>
-             <p>Moja przygoda z ptasznikami zaczęła się w 2020 roku od małej Chromki. Dziś to pasja, którą dzielę się z przyjemnością, oferując ptaszniki występujące w różnych regionach świata oraz transmitując podczas moich wypraw to jak żyją w naturze i nie tylko.</p>
-
-              <p>Każdy pająk, którego wybrałem do mojej oferty jest wyjątkowy na swój oryginalny sposób tak żeby każdy znalazł coś dla siebie. Z doświadczenia wiem, 
-
-                że wszystko zaczyna się od jednego a kończy na całym zapełnionym regale :D, mam nadzieję że Twoja przygoda z tymi fascynującymi zwierzętami będzie tak samo wspaniała jak moja...</p>
+             <h2 className="text-4xl font-bold text-[#44403c] mb-6 leading-tight">Cześć, jestem Arek.</h2>
+             <p className="text-[#78716c] leading-relaxed mb-6">
+                Witaj w świecie Spiderra! Wszystko zaczęło się w 2020 roku od jednej, małej Chromki (*Chromatopelma cyaneopubescens*). To, co miało być ciekawostką, przerodziło się w życiową pasję i sposób na życie.
+             </p>
+             <p className="text-[#78716c] leading-relaxed">
+                Dziś Spiderra to miejsce, gdzie terrarystyka spotyka się z jakością. Nie jestem wielką korporacją – jestem hobbystą, który chce dzielić się fascynacją do tych niesamowitych stworzeń.
+             </p>
           </div>
        </div>
     </div>
@@ -1149,7 +1160,7 @@ const StreamView = memo(() => (
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-[#44403c] p-0.5 border border-[#57534e]">
                 <div className="w-full h-full rounded-[0.5rem] flex items-center justify-center overflow-hidden">
-                   <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain"/>
+                   <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain" />
                 </div>
               </div>
               <div>
@@ -1350,7 +1361,7 @@ function AppContent() {
   const [lastOrder, setLastOrder] = useState(null); 
   const [selectedProduct, setSelectedProduct] = useState(null);
    
-  const { cart, setCart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast } = useCart();
+  const { cart, setCart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast, hasLiveAnimals } = useCart();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1599,7 +1610,20 @@ function AppContent() {
                 </div>
               ))}
             </div>
+
+            {/* --- SEKCJA PŁATNOŚCI W KOSZYKU --- */}
             <div className="pt-6 border-t border-[#e7e5e4] bg-white">
+              {/* Informacja o wymuszonej wysyłce (tylko wizualna, backend blokuje resztę) */}
+              {hasLiveAnimals && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3 rounded-xl mb-4 flex items-start gap-2">
+                      <Icons.Bug className="w-4 h-4 shrink-0 mt-0.5" />
+                      <div>
+                          <p className="font-bold">Twój koszyk zawiera żywe zwierzęta.</p>
+                          <p>Dostępna będzie tylko bezpieczna wysyłka (Pocztex/Heatpack).</p>
+                      </div>
+                  </div>
+              )}
+
               <div className="flex justify-between items-end mb-8">
                 <span className="text-[#78716c] font-medium">Razem</span>
                 <span className="text-2xl font-bold text-[#44403c]">{cartTotal.toFixed(2)} <span className="text-sm font-normal text-[#a8a29e]">PLN</span></span>
@@ -1612,6 +1636,7 @@ function AppContent() {
         </div>
       )}
 
+      {/* Stopka (bez zmian) */}
       <footer className="bg-white border-t border-[#e7e5e4] pt-20 pb-12 mt-auto">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
@@ -1646,9 +1671,9 @@ function AppContent() {
 
             <div>
               <h4 className="font-bold text-[#44403c] uppercase tracking-widest text-xs mb-6">Kontakt</h4>
-              <p className="text-sm font-medium text-[#78716c] mb-2">{COMPANY_DATA.email}</p>
-              <p className="text-sm font-medium text-[#78716c] mb-6">{COMPANY_DATA.phone}</p>
-              <div className="text-xs text-[#a8a29e] font-light leading-relaxed">
+              <p className="text-sm font-medium mb-2">{COMPANY_DATA.email}</p>
+              <p className="text-sm font-medium mb-6">{COMPANY_DATA.phone}</p>
+              <div className="text-xs leading-relaxed">
                   <p>{COMPANY_DATA.name}</p>
                   <p>ul. {COMPANY_DATA.address}</p>
                   <p>{COMPANY_DATA.zip} {COMPANY_DATA.city}</p>
