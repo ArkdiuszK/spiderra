@@ -1196,17 +1196,17 @@ const ShippingReturnsView = memo(() => (
             <div className="bg-[#fafaf9] p-4 rounded-xl border border-[#e7e5e4] flex items-start gap-4">
                 <div className="p-2 bg-white rounded-lg border border-[#e7e5e4] text-[#5c6b50]"><Icons.Box className="w-5 h-5"/></div>
                 <div>
-                    <h4 className="font-bold text-[#44403c] mb-1">Paczkomaty InPost</h4>
-                    <p className="text-xs text-[#78716c]">Przedpłata: <strong className="text-[#5c6b50]">15.00 zł</strong></p>
+                    <h4 className="font-bold text-[#44403c] mb-1">Kurier Pocztex (żywe zwierzęta)</h4>
+                    <p className="text-xs text-[#78716c]">Przedpłata: <strong className="text-[#5c6b50]">30.00 zł</strong></p>
                     <p className="text-xs text-[#a8a29e] mt-1">Czas dostawy: 1-2 dni robocze</p>
                 </div>
             </div>
             <div className="bg-[#fafaf9] p-4 rounded-xl border border-[#e7e5e4] flex items-start gap-4">
                 <div className="p-2 bg-white rounded-lg border border-[#e7e5e4] text-[#5c6b50]"><Icons.Truck className="w-5 h-5"/></div>
                 <div>
-                    <h4 className="font-bold text-[#44403c] mb-1">Kurier DPD</h4>
-                    <p className="text-xs text-[#78716c]">Przedpłata: <strong className="text-[#5c6b50]">20.00 zł</strong></p>
-                    <p className="text-xs text-[#a8a29e] mt-1">Czas dostawy: 1 dzień roboczy</p>
+                    <h4 className="font-bold text-[#44403c] mb-1">Kurier Inpost</h4>
+                    <p className="text-xs text-[#78716c]">Przedpłata: <strong className="text-[#5c6b50]">23.00 zł</strong></p>
+                    <p className="text-xs text-[#a8a29e] mt-1">Czas dostawy: 1-2 dni robocze</p>
                 </div>
             </div>
         </div>
