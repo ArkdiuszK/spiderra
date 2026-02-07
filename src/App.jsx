@@ -64,7 +64,6 @@ const PRODUCT_CATEGORIES = [
       {
         label: "Kategorie",
         tags: [
-          { id: 'terrarium', label: 'Terraria' },
           { id: 'container', label: 'Pojemniki hodowlane' },
           { id: 'substrate', label: 'Podłoże' },
           { id: 'tools', label: 'Narzędzia' },
