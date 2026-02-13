@@ -864,6 +864,22 @@ const AppContent = () => {
     localStorage.setItem('pendingCart', JSON.stringify(cart));
     
     setCheckoutLoading(true);
+
+    // FIX: Wykrywanie środowiska preview (blob/sandbox), gdzie nie ma backendu
+    // Pozwala to przetestować UI sukcesu bez prawdziwego API
+    const isPreview = window.location.protocol === 'blob:' || window.location.hostname.includes('sandbox') || window.location.hostname.includes('usercontent');
+
+    if (isPreview) {
+        // Symulacja płatności dla podglądu
+        setTimeout(() => {
+            setCheckoutLoading(false);
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('success', 'true');
+            window.location.href = currentUrl.toString();
+        }, 1500);
+        return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/create-checkout-session`, {
         method: 'POST',
@@ -888,7 +904,7 @@ const AppContent = () => {
       // W razie błędu nie czyścimy pendingCart, aby użytkownik nie stracił koszyka, 
       // ale w tym przypadku pendingCart służy tylko do SuccessView, więc to ok.
     } finally {
-      setCheckoutLoading(false);
+      if (!isPreview) setCheckoutLoading(false);
     }
   };
 
@@ -898,7 +914,7 @@ const AppContent = () => {
       <nav className="fixed top-0 w-full z-50 bg-spider-base/95 backdrop-blur-md border-b border-spider-sand h-24 transition-all">
          <div className="max-w-7xl mx-auto px-6 h-full flex justify-between items-center">
             <div className="cursor-pointer flex items-center gap-2 group" onClick={() => navigate('home')}>
-               <img src={LOGO_URL} alt="Spiderra" className="h-40 w-auto object-contain group-hover:scale-105 transition-transform duration-500" />
+               <img src={LOGO_URL} alt="Spiderra" className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-500" />
             </div>
             
             {/* Desktop Menu */}
@@ -1021,7 +1037,8 @@ const AppContent = () => {
          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-16">
             <div className="col-span-1 md:col-span-1 pr-4">
                <div className="flex items-center gap-4 mb-8 opacity-90">
-                  <img src={LOGO_URL2} className="h-16 w-auto object-contain"/>
+                  <img src={LOGO_URL} className="h-16 w-auto object-contain invert brightness-0"/>
+                  <span className="font-serif text-2xl font-bold tracking-wide">SPIDERRA</span>
                </div>
                <p className="text-white/50 text-sm leading-loose font-light">Profesjonalna hodowla i sklep stworzony z pasji do natury. Jakość, etyka i edukacja w jednym miejscu. Dołącz do naszej społeczności.</p>
             </div>
@@ -1052,7 +1069,7 @@ const AppContent = () => {
             </div>
          </div>
          <div className="max-w-7xl mx-auto px-6 mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-xs text-white/30 uppercase tracking-widest gap-4">
-            <p>2026 Spiderra© Arkadiusz Kołacki</p>
+            <p>© 2026 Spiderra Arkadiusz Kołacki</p>
             <div className="flex gap-6 items-center">
                 <span className="flex items-center gap-2"><Icons.Lock className="w-3 h-3"/> SSL Secured</span>
                 <span className="flex items-center gap-2">Bezpieczne płatności</span>
