@@ -3,7 +3,6 @@ import React, { useState, useMemo, useCallback, memo, useEffect, useRef } from '
 // --- KONFIGURACJA STYLU (PREMIUM LOOK & FEEL) ---
 const injectStyles = () => {
   if (typeof document !== 'undefined') {
-    // Tailwind + Custom Config
     if (!document.getElementById('tailwind-cdn')) {
       const script = document.createElement('script');
       script.id = 'tailwind-cdn';
@@ -45,7 +44,6 @@ const injectStyles = () => {
       };
       document.head.appendChild(script);
     }
-    // Fonty Google (Playfair Display + Inter)
     if (!document.getElementById('google-fonts')) {
       const link = document.createElement('link');
       link.id = 'google-fonts';
@@ -57,8 +55,22 @@ const injectStyles = () => {
 };
 injectStyles();
 
-// --- KONFIGURACJA DANYCH ---
-const API_URL = window.location.hostname !== 'localhost' ? '/.netlify/functions' : 'http://localhost:4242';
+// --- KONFIGURACJA API (AUTO-WYKRYWANIE) ---
+const getApiUrl = () => {
+    if (typeof window === 'undefined') return '';
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+
+    // Lokalne środowisko
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return 'http://localhost:4242';
+    
+    // Środowisko podglądu (brak backendu)
+    if (protocol === 'blob:' || hostname.includes('sandbox') || hostname.includes('usercontent') || hostname.includes('google')) return 'SIMULATION'; 
+    
+    // Produkcja (Netlify)
+    return '/.netlify/functions';
+};
+const API_URL = getApiUrl();
 
 const COMPANY_DATA = {
   name: "Spiderra.pl - Arkadiusz Kołacki",
@@ -75,65 +87,40 @@ const LOGO_URL = "/zdjecia/logo.png";
 const LOGO_URL2 = "/zdjecia/logo2.png"; 
 const HERO_IMAGE_URL = "/zdjecia/tlo.jpg"; 
 
-// --- STRUKTURA KATEGORII ---
+// --- DANE PRODUKTÓW ---
 const PRODUCT_CATEGORIES = [
   { id: 'all', label: 'Wszystko' },
   { 
-    id: 'spider', 
-    label: 'Ptaszniki',
+    id: 'spider', label: 'Ptaszniki',
     filterGroups: [
-      {
-        label: "Płeć", 
-        tags: [
-          { id: 'female', label: 'Samica' },
-          { id: 'male', label: 'Samiec' },
-          { id: 'unsexed', label: 'Niesex' }
-        ]
-      },
-      {
-        label: "Poziom",
-        tags: [
-          { id: 'beginner', label: 'Dla początkujących' },
-          { id: 'intermediate', label: 'Dla średniozaawansowanych' },
-          { id: 'advanced', label: 'Dla zaawansowanych' }
-        ]
-      },
-      {
-        label: "Typ / Cechy",
-        tags: [
-          { id: 'terrestrial', label: 'Naziemne' },
-          { id: 'arboreal', label: 'Nadrzewne' },
-          { id: 'fossorial', label: 'Podziemne' },
-          { id: 'rare', label: 'Rzadkie' },
-          { id: 'bestseller', label: 'Bestsellery' }
-        ]
-      }
+      { label: "Płeć", tags: [{ id: 'female', label: 'Samica' }, { id: 'male', label: 'Samiec' }, { id: 'unsexed', label: 'Niesex' }] },
+      { label: "Poziom", tags: [{ id: 'beginner', label: 'Dla początkujących' }, { id: 'intermediate', label: 'Dla średniozaawansowanych' }, { id: 'advanced', label: 'Dla zaawansowanych' }] },
+      { label: "Typ", tags: [{ id: 'terrestrial', label: 'Naziemne' }, { id: 'arboreal', label: 'Nadrzewne' }, { id: 'fossorial', label: 'Podziemne' }, { id: 'rare', label: 'Rzadkie' }, { id: 'bestseller', label: 'Bestsellery' }] }
     ]
   },
   { 
-    id: 'gear', 
-    label: 'Akcesoria',
+    id: 'gear', label: 'Akcesoria',
     filterGroups: [
-      {
-        label: "Kategorie",
-        tags: [
-          { id: 'terrarium', label: 'Terraria' },
-          { id: 'container', label: 'Pojemniki hodowlane' },
-          { id: 'substrate', label: 'Podłoże' },
-          { id: 'tools', label: 'Narzędzia' },
-          { id: 'heating', label: 'Ogrzewanie' },
-          { id: 'decor', label: 'Wystrój' }
-        ]
-      }
+      { label: "Kategorie", tags: [{ id: 'terrarium', label: 'Terraria' }, { id: 'container', label: 'Pojemniki' }, { id: 'substrate', label: 'Podłoże' }, { id: 'tools', label: 'Narzędzia' }, { id: 'heating', label: 'Ogrzewanie' }, { id: 'decor', label: 'Wystrój' }] }
     ]
   }
+];
+
+const MOCK_PRODUCTS_DATA = [
+  { id: 'spider1', name: 'Grammostola rosea', latin: 'Grammostola rosea', type: 'spider', tags: ['terrestrial', 'beginner', 'bestseller', 'female'], price: 150.00, image: '/zdjecia/ptaszniki/grammostola_rosea.jpg', desc: 'Ptasznik z Chile, znany ze swojego spokojnego usposobienia i łatwości hodowli. Gatunek naziemny, idealny dla początkujących.' },
+  { id: 'spider2', name: 'Caribena versicolor', latin: 'Caribena versicolor', type: 'spider', tags: ['arboreal', 'beginner', 'bestseller', 'unsexed'], price: 85.00, image: 'https://placehold.co/400x300/e2e8f0/10b981?text=Versicolor', desc: 'Jeden z najpiękniejszych ptaszników nadrzewnych. Dzięki łagodnemu usposobieniu nadaje się na pierwszego pająka nadrzewnego.' },
+  { id: 'spider3', name: 'Theraphosa stirmi', latin: 'Theraphosa stirmi', type: 'spider', tags: ['terrestrial', 'advanced', 'rare', 'sold_out', 'female'], price: 450.00, image: 'https://placehold.co/400x300/e2e8f0/991b1b?text=Stirmi', desc: 'Jeden z największych pająków świata. Wymaga doświadczenia w utrzymaniu odpowiedniej wilgotności.' },
+  { id: 'kit_s', name: 'Zestaw S "Plecak"', latin: 'Dla L1-L3', type: 'gear', tags: ['container', 'bestseller'], price: 11.99, image: 'https://placehold.co/400x300/f1f5f9/64748b?text=Zestaw+S', desc: 'Najlepszy start dla malucha (L1-L3). W skład zestawu wchodzi profesjonalny pojemnik hodowlany typu Breeding Box (5x5x7cm).', variants: [{ id: 'eco', name: 'Economy', price: 11.99, desc: 'Pojemnik + Torf', stripeId: 'price_PLACEHOLDER_ECO_S' }, { id: 'biz', name: 'Business', price: 14.99, desc: 'Pojemnik + Torf + Kora', stripeId: 'price_PLACEHOLDER_BIZ_S' }, { id: 'first', name: 'First Class', price: 17.99, desc: 'Premium + Mech + Ozdoby', stripeId: 'price_PLACEHOLDER_FIRST_S' }] },
+  { id: 'kit_m', name: 'Zestaw "Walizka podręczna"', latin: 'Dla L4-L7', type: 'gear', tags: ['container'], price: 39.99, image: 'https://placehold.co/400x300/f1f5f9/a8a29e?text=Zestaw+M', desc: 'Komfortowa przesiadka do klasy biznes dla podrostków (L4-L7). Sercem zestawu jest przestronny box hodowlany (19x12,5x7,5 cm).', variants: [{ id: 'eco', name: 'Economy', price: 39.99, desc: 'Moczbox + Torf', stripeId: 'price_PLACEHOLDER_ECO_M' }, { id: 'biz', name: 'Business', price: 49.00, desc: 'Braplast + Tuba', stripeId: 'price_PLACEHOLDER_BIZ_M' }, { id: 'first', name: 'First Class', price: 65.00, desc: 'Full Opcja', stripeId: 'price_PLACEHOLDER_FIRST_M' }] },
+  { id: 'kit_l', name: 'Zestaw "Bagaż rejestrowany"', latin: 'Dla Dorosłych', type: 'gear', tags: ['container'], price: 72.99, image: 'https://placehold.co/400x300/f1f5f9/78716c?text=Zestaw+L', desc: 'Luksusowa rezydencja dla dorosłych gigantów. Box 32x22x15 cm.', variants: [{ id: 'eco', name: 'Economy', price: 72.99, desc: 'Box + Torf', stripeId: 'price_PLACEHOLDER_ECO_L' }, { id: 'biz', name: 'Business', price: 89.00, desc: 'Duży Braplast + Tuba', stripeId: 'price_PLACEHOLDER_BIZ_L' }, { id: 'first', name: 'First Class', price: 129.00, desc: 'Full Opcja', stripeId: 'price_PLACEHOLDER_FIRST_L' }] },
+  { id: 'gear2', name: 'Włókno kokosowe', latin: 'Substrat', type: 'gear', tags: ['substrate', 'bestseller'], price: 15.00, image: 'https://placehold.co/400x300/f1f5f9/a8a29e?text=Włókno', desc: 'Podstawowe podłoże do terrariów.' },
+  { id: 'gear3', name: 'Pęseta długa', latin: '30 cm', type: 'gear', tags: ['tools'], price: 25.00, image: 'https://placehold.co/400x300/e2e8f0/64748b?text=Pęseta', desc: 'Niezbędne narzędzie do karmienia.' },
 ];
 
 // --- IKONY ---
 const IconBase = ({ children, className, ...props }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
 );
-
 const Icons = {
   ShoppingCart: (p) => <IconBase {...p}><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></IconBase>,
   Menu: (p) => <IconBase {...p}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></IconBase>,
@@ -161,87 +148,6 @@ const Icons = {
   Loader: (p) => <IconBase {...p} className={`animate-spin ${p.className}`}><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></IconBase>,
   ArrowUp: (p) => <IconBase {...p}><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></IconBase>
 };
-
-// --- DANE PRODUKTÓW ---
-const MOCK_PRODUCTS_DATA = [
-  { 
-    id: 'spider1', 
-    name: 'Grammostola rosea', 
-    latin: 'Grammostola rosea', 
-    type: 'spider', 
-    tags: ['terrestrial', 'beginner', 'bestseller', 'female'], 
-    price: 150.00, 
-    image: '/zdjecia/ptaszniki/grammostola_rosea.jpg', 
-    desc: 'Ptasznik z Chile, znany ze swojego spokojnego usposobienia i łatwości hodowli. Gatunek naziemny, idealny dla początkujących.' 
-  },
-  { 
-    id: 'spider2', 
-    name: 'Caribena versicolor', 
-    latin: 'Caribena versicolor', 
-    type: 'spider', 
-    tags: ['arboreal', 'beginner', 'bestseller', 'unsexed'], 
-    price: 85.00, 
-    image: 'https://placehold.co/400x300/e2e8f0/10b981?text=Versicolor', 
-    desc: 'Jeden z najpiękniejszych ptaszników nadrzewnych. Dzięki łagodnemu usposobieniu nadaje się na pierwszego pająka nadrzewnego.' 
-  },
-  { 
-    id: 'spider3', 
-    name: 'Theraphosa stirmi', 
-    latin: 'Theraphosa stirmi', 
-    type: 'spider', 
-    tags: ['terrestrial', 'advanced', 'rare', 'sold_out', 'female'], 
-    price: 450.00, 
-    image: 'https://placehold.co/400x300/e2e8f0/991b1b?text=Stirmi', 
-    desc: 'Jeden z największych pająków świata. Wymaga doświadczenia w utrzymaniu odpowiedniej wilgotności.' 
-  },
-  { 
-    id: 'kit_s', 
-    name: 'Zestaw S "Plecak"', 
-    latin: 'Dla L1-L3', 
-    type: 'gear', 
-    tags: ['container', 'bestseller'], 
-    price: 11.99, 
-    image: 'https://placehold.co/400x300/f1f5f9/64748b?text=Zestaw+S', 
-    desc: 'Najlepszy start dla malucha (L1-L3). W skład zestawu wchodzi profesjonalny pojemnik hodowlany typu Breeding Box (5x5x7cm).',
-    variants: [
-      { id: 'eco', name: 'Economy', price: 11.99, desc: 'Pojemnik + Torf', stripeId: 'price_PLACEHOLDER_ECO_S' }, 
-      { id: 'biz', name: 'Business', price: 14.99, desc: 'Pojemnik + Torf + Kora', stripeId: 'price_PLACEHOLDER_BIZ_S' },
-      { id: 'first', name: 'First Class', price: 17.99, desc: 'Premium + Mech + Ozdoby', stripeId: 'price_PLACEHOLDER_FIRST_S' }
-    ]
-  },
-  { 
-    id: 'kit_m', 
-    name: 'Zestaw "Walizka podręczna"', 
-    latin: 'Dla L4-L7', 
-    type: 'gear', 
-    tags: ['container'], 
-    price: 39.99,
-    image: 'https://placehold.co/400x300/f1f5f9/a8a29e?text=Zestaw+M', 
-    desc: 'Komfortowa przesiadka do klasy biznes dla podrostków (L4-L7). Sercem zestawu jest przestronny box hodowlany (19x12,5x7,5 cm).',
-    variants: [
-      { id: 'eco', name: 'Economy', price: 39.99, desc: 'Moczbox + Torf', stripeId: 'price_PLACEHOLDER_ECO_M' },
-      { id: 'biz', name: 'Business', price: 49.00, desc: 'Braplast + Tuba', stripeId: 'price_PLACEHOLDER_BIZ_M' },
-      { id: 'first', name: 'First Class', price: 65.00, desc: 'Full Opcja', stripeId: 'price_PLACEHOLDER_FIRST_M' }
-    ]
-  },
-  { 
-    id: 'kit_l', 
-    name: 'Zestaw "Bagaż rejestrowany"', 
-    latin: 'Dla Dorosłych', 
-    type: 'gear', 
-    tags: ['container'], 
-    price: 72.99,
-    image: 'https://placehold.co/400x300/f1f5f9/78716c?text=Zestaw+L', 
-    desc: 'Luksusowa rezydencja dla dorosłych gigantów. Box 32x22x15 cm.',
-    variants: [
-      { id: 'eco', name: 'Economy', price: 72.99, desc: 'Box + Torf', stripeId: 'price_PLACEHOLDER_ECO_L' },
-      { id: 'biz', name: 'Business', price: 89.00, desc: 'Duży Braplast + Tuba', stripeId: 'price_PLACEHOLDER_BIZ_L' },
-      { id: 'first', name: 'First Class', price: 129.00, desc: 'Full Opcja', stripeId: 'price_PLACEHOLDER_FIRST_L' }
-    ]
-  },
-  { id: 'gear2', name: 'Włókno kokosowe', latin: 'Substrat', type: 'gear', tags: ['substrate', 'bestseller'], price: 15.00, image: 'https://placehold.co/400x300/f1f5f9/a8a29e?text=Włókno', desc: 'Podstawowe podłoże do terrariów.' },
-  { id: 'gear3', name: 'Pęseta długa', latin: '30 cm', type: 'gear', tags: ['tools'], price: 25.00, image: 'https://placehold.co/400x300/e2e8f0/64748b?text=Pęseta', desc: 'Niezbędne narzędzie do karmienia.' },
-];
 
 // --- HOOKS ---
 const useCart = () => {
@@ -274,7 +180,7 @@ const useCart = () => {
   const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart]);
   const hasLiveAnimals = useMemo(() => cart.some(item => item.type === 'spider'), [cart]);
 
-  return { cart, setCart, isCartOpen, setIsCartOpen, toast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, showToast, hasLiveAnimals };
+  return { cart, setCart, isCartOpen, setIsCartOpen, toast, showToast, addToCart, removeFromCart, updateQty, cartTotal, cartCount, hasLiveAnimals };
 };
 
 // --- ERROR BOUNDARY ---
@@ -310,7 +216,6 @@ const ScrollToTop = () => {
 };
 
 // --- WIDOKI ---
-
 const SuccessView = memo(({ lastOrder }) => {
   if (!lastOrder) return null;
   const total = lastOrder.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -376,7 +281,7 @@ const BestsellerSlider = memo(({ products, onProductClick, addToCart }) => {
         {bestsellers.map(product => (
           <div key={product.id} className="flex-shrink-0 w-80 bg-white rounded-sm border border-transparent hover:border-spider-sand snap-start shadow-sm hover:shadow-2xl transition-all duration-500 group/card cursor-pointer" onClick={() => onProductClick(product)}>
             <div className="h-72 overflow-hidden relative group/image bg-spider-light">
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+              <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" decoding="async"/>
               <div className="absolute top-4 left-4 bg-spider-gold/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest shadow-lg">Top</div>
               <button onClick={(e) => { e.stopPropagation(); addToCart(product); }} className="absolute bottom-0 right-0 m-4 bg-white text-spider-dark p-3.5 rounded-full shadow-lg translate-y-12 opacity-0 group-hover:image:translate-y-0 group-hover:image:opacity-100 transition-all duration-300 hover:bg-spider-primary hover:text-white">
                 <Icons.Plus className="w-5 h-5" />
@@ -470,7 +375,7 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
       <div className="flex flex-col lg:flex-row gap-16 mb-24">
         <div className="w-full lg:w-1/2">
           <div className="aspect-[4/5] bg-white rounded-sm overflow-hidden border border-spider-sand relative group">
-            <img src={product.image} alt={product.name} className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${isSoldOut ? 'grayscale opacity-70' : ''}`} />
+            <img src={product.image} alt={product.name} className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${isSoldOut ? 'grayscale opacity-70' : ''}`} loading="eager" />
             {isSoldOut && <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm"><span className="border-2 border-spider-dark px-8 py-3 font-bold uppercase tracking-widest text-spider-dark text-lg">Wyprzedane</span></div>}
           </div>
         </div>
@@ -511,7 +416,7 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
               {relatedProducts.map(rp => (
                 <div key={rp.id} className="group cursor-pointer" onClick={() => onAddToCart(rp)}>
                    <div className="aspect-square bg-spider-light mb-6 overflow-hidden relative rounded-sm">
-                      <img src={rp.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+                      <img src={rp.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" decoding="async"/>
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                           <span className="bg-white text-spider-dark px-6 py-3 text-xs font-bold uppercase tracking-widest shadow-xl">Szybki zakup</span>
                       </div>
@@ -527,7 +432,7 @@ const ProductDetailsView = memo(({ product, onBack, onAddToCart, allProducts }) 
   );
 });
 
-// --- SHOP VIEW (ZAAWANSOWANE FILTRY + PREMIUM UI) ---
+// --- SHOP VIEW ---
 const ShopView = memo(({ addToCart, products, onProductClick }) => {
   const [category, setCategory] = useState('spider');
   const [selectedTags, setSelectedTags] = useState([]); 
@@ -551,18 +456,10 @@ const ShopView = memo(({ addToCart, products, onProductClick }) => {
     result = result.filter(p => p.price >= minPrice && p.price <= maxPrice);
     
     switch (sortOrder) {
-      case 'asc':
-        result.sort((a,b) => a.price - b.price);
-        break;
-      case 'desc':
-        result.sort((a,b) => b.price - a.price);
-        break;
-      case 'az':
-        result.sort((a,b) => a.name.localeCompare(b.name));
-        break;
-      case 'za':
-        result.sort((a,b) => b.name.localeCompare(a.name));
-        break;
+      case 'asc': result.sort((a,b) => a.price - b.price); break;
+      case 'desc': result.sort((a,b) => b.price - a.price); break;
+      case 'az': result.sort((a,b) => a.name.localeCompare(b.name)); break;
+      case 'za': result.sort((a,b) => b.name.localeCompare(a.name)); break;
       case 'bestsellers':
         result.sort((a, b) => {
             const aBest = a.tags && a.tags.includes('bestseller') ? 1 : 0;
@@ -570,15 +467,12 @@ const ShopView = memo(({ addToCart, products, onProductClick }) => {
             return bBest - aBest;
         });
         break;
-      default:
-        break;
+      default: break;
     }
-    
     return result;
   }, [category, selectedTags, minPrice, maxPrice, sortOrder, products]);
 
   const currentFilters = PRODUCT_CATEGORIES.find(c => c.id === category)?.filterGroups || [];
-
   const toggleTag = (id) => setSelectedTags(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]);
 
   return (
@@ -639,7 +533,7 @@ const ShopView = memo(({ addToCart, products, onProductClick }) => {
           {filtered.map(p => (
             <div key={p.id} className="group cursor-pointer bg-white transition-all duration-500 pb-4 hover:-translate-y-2" onClick={() => onProductClick(p)}>
                <div className="aspect-[4/5] bg-spider-light overflow-hidden relative mb-6 shadow-sm group-hover:shadow-xl transition-shadow rounded-sm">
-                  <img src={p.image} alt={p.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${p.tags.includes('sold_out') ? 'grayscale opacity-70' : ''}`} loading="lazy"/>
+                  <img src={p.image} alt={p.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${p.tags.includes('sold_out') ? 'grayscale opacity-70' : ''}`} loading="lazy" decoding="async"/>
                   {p.tags.includes('sold_out') && <div className="absolute top-0 right-0 bg-spider-dark text-white text-[10px] px-4 py-2 font-bold uppercase tracking-widest">Sprzedane</div>}
                   {!p.tags.includes('sold_out') && (
                     <button onClick={(e) => { e.stopPropagation(); addToCart(p); }} className="absolute bottom-0 right-0 m-4 bg-white text-spider-dark p-3.5 rounded-full shadow-lg translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-spider-primary hover:text-white">
@@ -664,7 +558,7 @@ const ShopView = memo(({ addToCart, products, onProductClick }) => {
 const HomeView = memo(({ navigateTo, products, onProductClick, addToCart }) => (
   <div className="animate-fade-in pb-12">
     <div className="relative h-[85vh] flex items-center justify-center overflow-hidden bg-spider-dark mb-24 group">
-      <img src={HERO_IMAGE_URL} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[30s]" alt="Hero"/>
+      <img src={HERO_IMAGE_URL} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[30s]" alt="Hero" loading="eager"/>
       <div className="relative z-10 text-center text-white px-4 max-w-5xl animate-fade-in">
         <span className="block text-xs font-bold uppercase tracking-[0.4em] mb-8 text-spider-gold opacity-90">Arkadiusz Kołacki Presents</span>
         <h1 className="font-serif text-5xl md:text-8xl lg:text-9xl mb-10 leading-none tracking-tight">Pasja w formie<br/><span className="italic font-light opacity-90">czystej natury.</span></h1>
@@ -686,7 +580,7 @@ const AboutView = memo(() => (
     <div className="flex flex-col md:flex-row gap-20 items-center mb-32">
        <div className="w-full md:w-1/2 relative group">
           <div className="absolute -top-6 -left-6 w-full h-full border-2 border-spider-gold z-0 transition-transform group-hover:translate-x-2 group-hover:translate-y-2"></div>
-          <img src="/zdjecia/arek.png" alt="Arek" className="relative z-10 w-full grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl"/>
+          <img src="/zdjecia/arek.png" alt="Arek" className="relative z-10 w-full grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl" loading="lazy" decoding="async"/>
        </div>
        <div className="w-full md:w-1/2">
           <span className="text-spider-gold font-bold uppercase tracking-[0.25em] text-xs mb-6 block">Historia Marki</span>
@@ -828,17 +722,14 @@ const AppContent = () => {
   const [products] = useState(MOCK_PRODUCTS_DATA);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  // Dodano stany potrzebne do obsługi płatności
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [lastOrder, setLastOrder] = useState(null);
 
-  const { cart, setCart, isCartOpen, setIsCartOpen, addToCart, removeFromCart, updateQty, cartTotal, hasLiveAnimals, toast, showToast } = useCart();
+  const { cart, isCartOpen, setIsCartOpen, addToCart, removeFromCart, updateQty, cartTotal, hasLiveAnimals, toast, showToast, setCart } = useCart();
 
   const navigate = (view) => { setActiveView(view); setSelectedProduct(null); setIsMobileMenuOpen(false); window.scrollTo({top:0, behavior:'smooth'}); };
   const openProduct = (p) => { setSelectedProduct(p); navigate('shop'); window.scrollTo({top:0, behavior:'smooth'}); };
 
-  // Obsługa powrotu z płatności (sukces/anulowanie)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success')) {
@@ -856,26 +747,18 @@ const AppContent = () => {
     }
   }, [setCart, showToast]);
 
-  // Funkcja obsługująca płatność
   const handleCheckout = async () => {
     if (cart.length === 0) return;
-    
-    // Zapisz koszyk w localStorage przed przekierowaniem, aby móc go odczytać po powrocie (sukces)
     localStorage.setItem('pendingCart', JSON.stringify(cart));
-    
     setCheckoutLoading(true);
 
-    // FIX: Wykrywanie środowiska preview (blob/sandbox), gdzie nie ma backendu
-    // Pozwala to przetestować UI sukcesu bez prawdziwego API
-    const isPreview = window.location.protocol === 'blob:' || window.location.hostname.includes('sandbox') || window.location.hostname.includes('usercontent');
-
-    if (isPreview) {
-        // Symulacja płatności dla podglądu
+    if (API_URL === 'SIMULATION') {
         setTimeout(() => {
             setCheckoutLoading(false);
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('success', 'true');
-            window.location.href = currentUrl.toString();
+            setLastOrder(cart);
+            setCart([]);
+            setActiveView('success');
+            showToast("Płatność testowa zakończona sukcesem (Symulacja)");
         }, 1500);
         return;
     }
@@ -901,10 +784,8 @@ const AppContent = () => {
     } catch (e) {
       console.error("Błąd płatności:", e);
       showToast(e.message || "Wystąpił błąd podczas płatności.", 'error');
-      // W razie błędu nie czyścimy pendingCart, aby użytkownik nie stracił koszyka, 
-      // ale w tym przypadku pendingCart służy tylko do SuccessView, więc to ok.
     } finally {
-      if (!isPreview) setCheckoutLoading(false);
+      if (API_URL !== 'SIMULATION') setCheckoutLoading(false);
     }
   };
 
@@ -917,7 +798,6 @@ const AppContent = () => {
                <img src={LOGO_URL} alt="Spiderra" className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-500" />
             </div>
             
-            {/* Desktop Menu */}
             <div className="hidden md:flex gap-10 text-xs font-bold uppercase tracking-[0.15em] text-spider-dark/60">
                <button onClick={() => navigate('home')} className={`hover:text-spider-dark transition-colors ${activeView === 'home' ? 'text-spider-dark border-b-2 border-spider-gold pb-1' : ''}`}>Start</button>
                <button onClick={() => navigate('shop')} className={`hover:text-spider-dark transition-colors ${activeView === 'shop' ? 'text-spider-dark border-b-2 border-spider-gold pb-1' : ''}`}>Sklep</button>
@@ -961,7 +841,6 @@ const AppContent = () => {
                  <button onClick={() => setIsCartOpen(false)} className="hover:rotate-90 transition-transform p-2"><Icons.X/></button>
               </div>
               
-              {/* Pasek darmowej dostawy */}
               <div className="px-8 py-6 bg-spider-light border-b border-spider-sand">
                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mb-3 text-spider-dark/70">
                     <span>Darmowa dostawa</span>
@@ -1026,7 +905,6 @@ const AppContent = () => {
          {activeView === 'contact' && <ContactView/>}
          {activeView === 'success' && <SuccessView lastOrder={lastOrder}/>}
          
-         {/* Legal Views Wrappers */}
          {activeView === 'terms' && <LegalView title="Regulamin Sklepu"><TermsView/></LegalView>}
          {activeView === 'privacy' && <LegalView title="Polityka Prywatności"><PrivacyView/></LegalView>}
          {activeView === 'shipping' && <LegalView title="Wysyłka i Zwroty"><ShippingReturnsView/></LegalView>}
